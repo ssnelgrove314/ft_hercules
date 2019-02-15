@@ -48,6 +48,8 @@ int main(int argc, char **argv)
     //send the string to the server
     if (send(cli.sock, cli.echo_msg, cli.echo_msg_len, 0) != cli.echo_msg_len)
         die_with_error("send() sent a different number of bytes than expected");
+    
+    cli.total_bytes_rcvd = 0;
 
 
 }
