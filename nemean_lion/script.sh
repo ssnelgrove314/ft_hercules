@@ -1,5 +1,5 @@
 #!/bin/bash
-
+apt-get update && apt-get upgrade
 apt-get install openssh-server -y
 PORT_NUMBER="9123"
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
