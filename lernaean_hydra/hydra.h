@@ -8,6 +8,7 @@
 #include <netinet/in.h> 
 #include <string.h> 
 #include <arpa/inet.h>
+#include <fcntl.h>
 # define PORT 8080
 # define BUFFER_SIZE 1024
 # define MAX_PENDING 5

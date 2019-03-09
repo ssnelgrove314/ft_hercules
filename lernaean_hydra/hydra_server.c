@@ -12,9 +12,25 @@ struct sockaddr_in *init_serv_sockaddr(t_server *serv)
 
     ret = (struct sockaddr_in *)calloc(sizeof(struct sockaddr_in), 1);
     ret->sin_family = AF_INET;
-    ret->sin_addr.s_addr = inet_addr("10.113.6.4");
+    ret->sin_addr.s_addr = inet_addr("127.0.0.1");
     ret->sin_port = htons(serv->echo_serv_port);
     return (ret);
+}
+
+void                                     /* Returns 0 on success, -1 on error */
+becomeDaemon()
+{
+    pid_t pid;
+    /* Fork off the parent process */       
+    pid = fork();
+    if (pid < 0) {
+            exit(EXIT_FAILURE);
+    }
+    /* If we got a good PID, then
+        we can exit the parent process. */
+    if (pid > 0) {
+            exit(EXIT_SUCCESS);
+    }
 }
 
 void handle_tcp_client(t_server *serv)
@@ -24,20 +40,14 @@ void handle_tcp_client(t_server *serv)
 
     if ((recv_msg_len = recv(serv->clnt_sock, echo_buffer, BUFFER_SIZE, 0)) < 0)
         die_with_error("recv() failed");
-    
-    while(recv_msg_len > 0)
+    // printf("%s", echo_buffer);
+    // printf("%d\n", strcmp(echo_buffer, "ping"));
+    if (!strcmp(echo_buffer, "ping"))
     {
-         // duplicate the message here
-
-        //
-        
-        //echo once
-            if (send(serv->clnt_sock, echo_buffer, recv_msg_len, 0) != recv_msg_len)
-                die_with_error("send() failed");
-        //check to see if there is more to the message.
-            if ((recv_msg_len = recv(serv->clnt_sock, echo_buffer, BUFFER_SIZE, 0)) < 0)
-                die_with_error("recv() failed");
+        if (send(serv->clnt_sock, "pong pong", 9, 0) != 9)
+            die_with_error("send() failed");
     }
+    bzero(echo_buffer, BUFFER_SIZE);
     close(serv->clnt_sock);
 }
 
@@ -46,10 +56,17 @@ int main(int argc, char **argv)
     t_server *serv;
 
     serv = (t_server *)calloc(sizeof(t_server), 1);
-    if (argc != 2)
+    if (argc == 1 || argc > 3)
     {
-        printf("Usage: %s <Server Port> \n", argv[0]);
+        printf("Usage: %s <Server Port> [-D]\n", argv[0]);
         exit(1);
+    }
+    if (argc == 3)
+    {
+        if (!strcmp(argv[2], "-D"))
+            becomeDaemon();
+        else
+            printf("Usage: %s <Server Port> [-D]\n", argv[0]);
     }
     
     serv->echo_serv_port = atoi(argv[1]);
